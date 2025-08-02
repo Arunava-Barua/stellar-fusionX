@@ -79,28 +79,26 @@ impl MockToken {
             .set(&DataKey::Balance(to), &new_to_balance);
     }
 
-    pub fn transfer(env: Env, amount: u128, to: Address, caller: Address) {
-        caller.require_auth();
-
-        if amount == 0 {
+    pub fn transfer(env: Env, from: Address, to: Address, amount: i128) {
+        let _amount = amount as u128;
+        if _amount == 0 {
             panic!("Invalid amount");
         }
 
-        let sender_balance = Self::get_balance(env.clone(), caller.clone());
-
-        if amount > sender_balance {
+        let sender_balance = Self::get_balance(env.clone(), from.clone());
+        if _amount > sender_balance {
             panic!("Invalid balance");
         }
 
         // Update sender balance
-        let new_sender_balance = sender_balance - amount;
+        let new_sender_balance = sender_balance - _amount;
         env.storage()
             .persistent()
-            .set(&DataKey::Balance(caller), &new_sender_balance);
+            .set(&DataKey::Balance(from), &new_sender_balance);
 
         // Update recipient balance
         let recipient_balance = Self::get_balance(env.clone(), to.clone());
-        let new_recipient_balance = recipient_balance + amount;
+        let new_recipient_balance = recipient_balance + _amount;
         env.storage()
             .persistent()
             .set(&DataKey::Balance(to), &new_recipient_balance);

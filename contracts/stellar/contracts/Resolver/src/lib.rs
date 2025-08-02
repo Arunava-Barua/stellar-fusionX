@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, token, Address, BytesN, Env};
 
 mod dutch_auction {
     soroban_sdk::contractimport!(file = "G:\\EthUnite\\stellar-fusionX\\contracts\\stellar\\target\\wasm32v1-none\\release\\dutchauction.wasm");
@@ -71,18 +71,26 @@ impl Resolver {
         token_out: Address,
         amount_out: u128,
         maker: Address,
-    ) {
+    ) -> Address {
         Self::only_owner(env.clone());
         let _escrow_factory =
             escrow_factory::Client::new(&env.clone(), &Self::get_escrow_factory(env.clone()));
-        _escrow_factory.deploy_dest(
+        let escrow_dest_contract = _escrow_factory.deploy_dest(
             &order_id.clone(),
             &hash_lock.clone(),
             &token_out.clone(),
             &amount_out.clone(),
             &maker.clone(),
-            &caller.clone(), // executive_resolver
+            &caller.clone(),
         );
+
+        escrow_dest_contract
+    }
+
+    pub fn moveFund(env: Env, amountIn: u128, to: Address, token: Address) {
+        let token_client = token::Client::new(&env, &token);
+        // Transfer security deposit from caller to this factory contract
+        token_client.transfer(&env.current_contract_address(), &to, &(amountIn as i128));
     }
 
     pub fn withdraw(env: Env, escrow: Address, secret: BytesN<32>) {
