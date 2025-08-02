@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
+
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -805,6 +807,10 @@ export default function DashboardPage() {
       }
 
       console.log("✅ Deposit submitted successfully:", depositResponse.hash);
+      toast({
+        title: "✅ Tokens Wrapped",
+        description: `Tx Hash: ${depositResponse.hash.slice(0, 6)}...`,
+      });
 
       setTransactionHashes((prev) => ({
         ...prev,
@@ -1271,7 +1277,7 @@ export default function DashboardPage() {
                               Wrap Tokens
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg">
+                          <DialogContent className="bg-slate-900 border-white/10 text-white max-w-lg max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Wrap Mock Tokens</DialogTitle>
                             </DialogHeader>
@@ -1424,24 +1430,6 @@ export default function DashboardPage() {
                                       2. Deposit tokens to get wrapped tokens
                                     </span>
                                   </div>
-                                  {accountStatus?.exists && (
-                                    <div className="pt-1">
-                                      <Button
-                                        onClick={() =>
-                                          window.open(
-                                            "https://laboratory.stellar.org/#account-creator?network=test",
-                                            "_blank"
-                                          )
-                                        }
-                                        size="sm"
-                                        variant="outline"
-                                        className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 text-xs"
-                                      >
-                                        <ExternalLink className="w-3 h-3 mr-1" />
-                                        View on Stellar Laboratory
-                                      </Button>
-                                    </div>
-                                  )}
                                 </div>
                               </div>
 
@@ -1532,67 +1520,60 @@ export default function DashboardPage() {
                                 </Alert>
                               )}
 
-                              {/* Transaction Results */}
+                              {/* Simple Success Messages */}
                               {(transactionHashes.approveHash ||
                                 transactionHashes.depositHash) && (
-                                <Alert className="bg-green-500/10 border-green-500/30 text-green-400">
-                                  <CheckCircle className="h-4 w-4" />
-                                  <AlertDescription className="text-sm space-y-3">
-                                    <div className="font-medium">
-                                      {wrapStep === "completed"
-                                        ? "✅ Tokens wrapped successfully!"
-                                        : "✅ Approval successful!"}
+                                <div className="space-y-3">
+                                  {transactionHashes.approveHash && (
+                                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center justify-between">
+                                      <div className="flex items-center space-x-2">
+                                        <CheckCircle className="w-4 h-4 text-green-400" />
+                                        <span className="text-green-400 text-sm">
+                                          🎉 Token Approved
+                                        </span>
+                                      </div>
+                                      <Button
+                                        onClick={() =>
+                                          window.open(
+                                            `https://stellar.expert/explorer/testnet/tx/${transactionHashes.approveHash}`,
+                                            "_blank"
+                                          )
+                                        }
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-green-500/30 text-green-400 hover:bg-green-500/10 text-xs h-7"
+                                      >
+                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                        View in Explorer
+                                      </Button>
                                     </div>
-                                    {transactionHashes.approveHash && (
-                                      <div className="space-y-1">
-                                        <div className="text-xs text-gray-400">
-                                          Approval Transaction:
-                                        </div>
-                                        <div className="bg-white/5 p-2 rounded text-xs font-mono break-all">
-                                          {transactionHashes.approveHash}
-                                        </div>
-                                        <Button
-                                          onClick={() =>
-                                            window.open(
-                                              `https://stellar.expert/explorer/testnet/tx/${transactionHashes.approveHash}`,
-                                              "_blank"
-                                            )
-                                          }
-                                          size="sm"
-                                          variant="outline"
-                                          className="border-green-500/30 text-green-400 hover:bg-green-500/10 text-xs"
-                                        >
-                                          <ExternalLink className="w-3 h-3 mr-1" />
-                                          View in Explorer
-                                        </Button>
+                                  )}
+
+                                  {transactionHashes.depositHash && (
+                                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 flex items-center justify-between">
+                                      <div className="flex items-center space-x-2">
+                                        <CheckCircle className="w-4 h-4 text-green-400" />
+                                        <span className="text-green-400 text-sm">
+                                          🎉 Token Deposited
+                                        </span>
                                       </div>
-                                    )}
-                                    {transactionHashes.depositHash && (
-                                      <div className="space-y-1">
-                                        <div className="text-xs text-gray-400">
-                                          Deposit Transaction:
-                                        </div>
-                                        <div className="bg-white/5 p-2 rounded text-xs font-mono break-all">
-                                          {transactionHashes.depositHash}
-                                        </div>
-                                        <Button
-                                          onClick={() =>
-                                            window.open(
-                                              `https://stellar.expert/explorer/testnet/tx/${transactionHashes.depositHash}`,
-                                              "_blank"
-                                            )
-                                          }
-                                          size="sm"
-                                          variant="outline"
-                                          className="border-green-500/30 text-green-400 hover:bg-green-500/10 text-xs"
-                                        >
-                                          <ExternalLink className="w-3 h-3 mr-1" />
-                                          View in Explorer
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </AlertDescription>
-                                </Alert>
+                                      <Button
+                                        onClick={() =>
+                                          window.open(
+                                            `https://stellar.expert/explorer/testnet/tx/${transactionHashes.depositHash}`,
+                                            "_blank"
+                                          )
+                                        }
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-green-500/30 text-green-400 hover:bg-green-500/10 text-xs h-7"
+                                      >
+                                        <ExternalLink className="w-3 h-3 mr-1" />
+                                        View in Explorer
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
                               )}
 
                               <div className="space-y-2">
@@ -1646,65 +1627,13 @@ export default function DashboardPage() {
 
                                   <Button
                                     onClick={() => setShowWrapDialog(false)}
-                                    variant="outline"
-                                    className="border-white/20 text-white hover:bg-white/10"
-                                    disabled={approveLoading || wrapLoading}
+                                    className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
                                   >
                                     {wrapStep === "completed"
                                       ? "Close"
                                       : "Cancel"}
                                   </Button>
                                 </div>
-
-                                {/* Debug info when account check fails */}
-                                {!accountStatus?.exists &&
-                                  !accountStatus?.loading &&
-                                  wrapForm.tokenAddress &&
-                                  wrapForm.amount &&
-                                  wrapStep === "initial" && (
-                                    <div className="text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/30 rounded p-2">
-                                      <div>
-                                        ⚠️ Account status check failed, but you
-                                        can still proceed.
-                                      </div>
-                                      <div className="mt-1 text-gray-400">
-                                        Debug: Address=
-                                        {userData?.stellarPublicAddress?.slice(
-                                          0,
-                                          8
-                                        )}
-                                        ..., Token=
-                                        {wrapForm.tokenAddress.slice(0, 8)}...,
-                                        Amount={wrapForm.amount}
-                                      </div>
-                                      <div className="mt-1 text-gray-400">
-                                        Kit:{" "}
-                                        {stellarKit
-                                          ? "Initialized"
-                                          : "Not initialized"}
-                                        , Albedo:{" "}
-                                        {typeof window !== "undefined" &&
-                                        (window as any).albedo
-                                          ? "Available"
-                                          : "Not available"}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                {/* Button is disabled debug */}
-                                {wrapStep === "initial" &&
-                                  (!wrapForm.tokenAddress.trim() ||
-                                    !wrapForm.amount.trim()) && (
-                                    <div className="text-xs text-gray-400 bg-gray-500/10 border border-gray-500/30 rounded p-2">
-                                      Button disabled:{" "}
-                                      {!wrapForm.tokenAddress.trim()
-                                        ? "Missing token address"
-                                        : ""}{" "}
-                                      {!wrapForm.amount.trim()
-                                        ? "Missing amount"
-                                        : ""}
-                                    </div>
-                                  )}
                               </div>
                             </div>
                           </DialogContent>
